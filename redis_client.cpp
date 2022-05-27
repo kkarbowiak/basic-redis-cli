@@ -62,5 +62,10 @@ std::string RedisClient::send_command(std::string const & command)
     {
         throw std::runtime_error("Command error: " + std::string(reply_ptr->str));
     }
+
+    if (!reply_ptr->str)
+    {
+        return "(nil)";
+    }
     return std::string(reply.get()->str);
 }
