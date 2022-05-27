@@ -1,23 +1,13 @@
 #include "argparse.h"
+#include "redis_client.h"
 #include <stdexcept>
-#include <hiredis/hiredis.h>
 
 
 void send_command(std::string const & command)
 {
-    auto redis_context = redisConnect("127.0.0.1", 6379);
-    if (!redis_context)
-    {
-        std::cout << "Error: could not allocate Redis context\n";
-    }
-    if (redis_context->err)
-    {
-        std::cout << "Connection error: " << redis_context->errstr << "\n";
-    }
-    auto redis_reply = (redisReply*) redisCommand(redis_context, command.c_str());
-    std::cout << redis_reply->str << "\n";
-    freeReplyObject(redis_reply);
-    redisFree(redis_context);
+    auto client = RedisClient("127.0.0.1", 6379);
+    auto result = client.send_command(command);
+    std::cout << result << "\n";
 }
 
 void set_value(std::string const & key, std::string const & value)
