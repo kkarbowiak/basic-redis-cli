@@ -53,5 +53,13 @@ RedisClient::~RedisClient()
 std::string RedisClient::send_command(std::string const & command)
 {
     auto reply = RedisReply(redisCommand(m_redis_context, command.c_str()));
+    if (!reply.get())
+    {
+        throw std::runtime_error("Command error: sending command failed");
+    }
+    if (reply.get()->type == REDIS_REPLY_ERROR)
+    {
+        throw std::runtime_error("Command error: " + std::string(reply.get()->str));
+    }
     return std::string(reply.get()->str);
 }
