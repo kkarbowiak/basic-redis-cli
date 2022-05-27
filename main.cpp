@@ -21,22 +21,30 @@ void get_value(std::string const & key)
 
 int main(int argc, char * argv[])
 {
-    auto parser = argparse::ArgumentParser();
-    auto group = parser.add_mutually_exclusive_group();
-    group.add_argument("-s", "--set").nargs(2).help("sets key to value");
-    group.add_argument("-g", "--get").help("gets value for key");
-
-    auto parsed = parser.parse_args(argc, argv);
-
-    if (parsed.get("set"))
+    try
     {
-        auto const set_data = parsed.get_value<std::vector<std::string>>("set");
-        set_value(set_data[0], set_data[1]);
+        auto parser = argparse::ArgumentParser();
+        auto group = parser.add_mutually_exclusive_group();
+        group.add_argument("-s", "--set").nargs(2).help("sets key to value");
+        group.add_argument("-g", "--get").help("gets value for key");
+
+        auto parsed = parser.parse_args(argc, argv);
+
+        if (parsed.get("set"))
+        {
+            auto const set_data = parsed.get_value<std::vector<std::string>>("set");
+            set_value(set_data[0], set_data[1]);
+        }
+
+        if (parsed.get("get"))
+        {
+            get_value(parsed.get_value("get"));
+        }
     }
-
-    if (parsed.get("get"))
+    catch (std::exception const & e)
     {
-        get_value(parsed.get_value("get"));
+        std::cout << "Error: " << e.what() << "\n";
+        return 1;
     }
 
     return 0;
