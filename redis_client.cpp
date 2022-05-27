@@ -2,6 +2,35 @@
 #include <stdexcept>
 
 
+namespace
+{
+    class RedisReply
+    {
+        public:
+            explicit RedisReply(void * reply)
+              : m_redis_reply(static_cast<redisReply *>(reply))
+            {
+            }
+
+            ~RedisReply()
+            {
+                freeReplyObject(m_redis_reply);
+            }
+
+            redisReply * get() const
+            {
+                return m_redis_reply;
+            }
+
+        private:
+            RedisReply(RedisReply const &) = delete;
+            RedisReply & operator=(RedisReply const &) = delete;
+
+        private:
+            redisReply * m_redis_reply;
+    };
+}
+
 RedisClient::RedisClient(std::string const & ip, int port)
   : m_redis_context(redisConnect(ip.c_str(), port))
 {
@@ -19,4 +48,10 @@ RedisClient::RedisClient(std::string const & ip, int port)
 RedisClient::~RedisClient()
 {
     redisFree(m_redis_context);
+}
+
+std::string RedisClient::send_command(std::string const & command)
+{
+    auto reply = RedisReply(redisCommand(m_redis_context, command.c_str()));
+    return std::string(reply.get()->str);
 }
