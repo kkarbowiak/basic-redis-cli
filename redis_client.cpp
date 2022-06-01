@@ -41,7 +41,7 @@ RedisClient::RedisClient(std::string const & ip, int port)
     if (m_redis_context->err)
     {
         redisFree(m_redis_context);
-        throw std::runtime_error("Conneection error: " + std::string(m_redis_context->errstr));
+        throw std::runtime_error("Connection error: " + std::string(m_redis_context->errstr));
     }
 }
 
