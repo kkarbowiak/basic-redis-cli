@@ -3,20 +3,19 @@
 #include <stdexcept>
 
 
-void send_command(RedisClient & client, std::string const & command)
+auto send_command(RedisClient & client, std::string const & command)
 {
-    auto result = client.send_command(command);
-    std::cout << result << "\n";
+    return client.send_command(command);
 }
 
-void set_value(RedisClient & client, std::string const & key, std::string const & value)
+auto set_value(RedisClient & client, std::string const & key, std::string const & value)
 {
-    send_command(client, "SET " + key + " " + value);
+    return send_command(client, "SET " + key + " " + value);
 }
 
-void get_value(RedisClient & client, std::string const & key)
+auto get_value(RedisClient & client, std::string const & key)
 {
-    send_command(client, "GET " + key);
+    return send_command(client, "GET " + key);
 }
 
 int main(int argc, char * argv[])
@@ -37,12 +36,14 @@ int main(int argc, char * argv[])
         if (parsed.get("set"))
         {
             auto const set_data = parsed.get_value<std::vector<std::string>>("set");
-            set_value(client, set_data[0], set_data[1]);
+            auto const result = set_value(client, set_data[0], set_data[1]);
+            std::cout << result << '\n';
         }
 
         if (parsed.get("get"))
         {
-            get_value(client, parsed.get_value("get"));
+            auto const result = get_value(client, parsed.get_value("get"));
+            std::cout << result << '\n';
         }
     }
     catch (std::exception const & e)
