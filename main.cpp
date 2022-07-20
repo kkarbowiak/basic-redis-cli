@@ -3,19 +3,14 @@
 #include <stdexcept>
 
 
-auto send_command(RedisClient & client, std::string const & command)
-{
-    return client.send_command(command);
-}
-
 auto set_value(RedisClient & client, std::string const & key, std::string const & value)
 {
-    return send_command(client, "SET " + key + " " + value);
+    return client.set(key, value);
 }
 
 auto get_value(RedisClient & client, std::string const & key)
 {
-    return send_command(client, "GET " + key);
+    return client.get(key);
 }
 
 int main(int argc, char * argv[])
