@@ -29,6 +29,25 @@ namespace
         private:
             redisReply * m_redis_reply;
     };
+
+auto handle_reply(redisReply const * reply) -> std::string
+{
+    if (!reply)
+    {
+        throw std::runtime_error("Command error: sending command failed");
+    }
+    if (reply->type == REDIS_REPLY_ERROR)
+    {
+        throw std::runtime_error("Command error: " + std::string(reply->str));
+    }
+
+    if (!reply->str)
+    {
+        return "(nil)";
+    }
+    return std::string(reply->str);
+}
+
 }
 
 RedisClient::RedisClient(std::string const & ip, int port)
@@ -53,59 +72,20 @@ RedisClient::~RedisClient()
 std::string RedisClient::send_command(std::string const & command)
 {
     auto reply = RedisReply(redisCommand(m_redis_context, command.c_str()));
-    auto reply_ptr = reply.get();
-    if (!reply_ptr)
-    {
-        throw std::runtime_error("Command error: sending command failed");
-    }
-    if (reply_ptr->type == REDIS_REPLY_ERROR)
-    {
-        throw std::runtime_error("Command error: " + std::string(reply_ptr->str));
-    }
 
-    if (!reply_ptr->str)
-    {
-        return "(nil)";
-    }
-    return std::string(reply.get()->str);
+    return handle_reply(reply.get());
 }
 
 std::string RedisClient::get(std::string const & key)
 {
     auto reply = RedisReply(redisCommand(m_redis_context, "GET %s", key.c_str()));
-    auto reply_ptr = reply.get();
-    if (!reply_ptr)
-    {
-        throw std::runtime_error("Command error: sending command failed");
-    }
-    if (reply_ptr->type == REDIS_REPLY_ERROR)
-    {
-        throw std::runtime_error("Command error: " + std::string(reply_ptr->str));
-    }
 
-    if (!reply_ptr->str)
-    {
-        return "(nil)";
-    }
-    return std::string(reply.get()->str);
+    return handle_reply(reply.get());
 }
 
 std::string RedisClient::set(std::string const & key, std::string const & value)
 {
     auto reply = RedisReply(redisCommand(m_redis_context, "SET %s %s", key.c_str(), value.c_str()));
-    auto reply_ptr = reply.get();
-    if (!reply_ptr)
-    {
-        throw std::runtime_error("Command error: sending command failed");
-    }
-    if (reply_ptr->type == REDIS_REPLY_ERROR)
-    {
-        throw std::runtime_error("Command error: " + std::string(reply_ptr->str));
-    }
 
-    if (!reply_ptr->str)
-    {
-        return "(nil)";
-    }
-    return std::string(reply.get()->str);
+    return handle_reply(reply.get());
 }
