@@ -69,3 +69,43 @@ std::string RedisClient::send_command(std::string const & command)
     }
     return std::string(reply.get()->str);
 }
+
+std::string RedisClient::get(std::string const & key)
+{
+    auto reply = RedisReply(redisCommand(m_redis_context, "GET %s", key.c_str()));
+    auto reply_ptr = reply.get();
+    if (!reply_ptr)
+    {
+        throw std::runtime_error("Command error: sending command failed");
+    }
+    if (reply_ptr->type == REDIS_REPLY_ERROR)
+    {
+        throw std::runtime_error("Command error: " + std::string(reply_ptr->str));
+    }
+
+    if (!reply_ptr->str)
+    {
+        return "(nil)";
+    }
+    return std::string(reply.get()->str);
+}
+
+std::string RedisClient::set(std::string const & key, std::string const & value)
+{
+    auto reply = RedisReply(redisCommand(m_redis_context, "SET %s %s", key.c_str(), value.c_str()));
+    auto reply_ptr = reply.get();
+    if (!reply_ptr)
+    {
+        throw std::runtime_error("Command error: sending command failed");
+    }
+    if (reply_ptr->type == REDIS_REPLY_ERROR)
+    {
+        throw std::runtime_error("Command error: " + std::string(reply_ptr->str));
+    }
+
+    if (!reply_ptr->str)
+    {
+        return "(nil)";
+    }
+    return std::string(reply.get()->str);
+}
